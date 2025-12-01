@@ -1,16 +1,17 @@
 ---
-title: "Lab 05 - La Quinta is Spanish for next to Denny's, Pt. 2"
+title: "HW 05 - La Quinta is Spanish for next to Denny's, Pt. 2"
 subtitle: "Wrangling spatial data"
+author: "NAM PHAM"
 output: 
+  tufte::tufte_html:
+    css: ../lab.css
+    tufte_variant: "envisioned"
+    highlight: pygments
   tufte::tufte_handout:
     latex_engine: xelatex
     highlight: pygments
     keep_tex: true
     citation_package: natbib
-  tufte::tufte_html:
-    css: ../lab.css
-    tufte_variant: "envisioned"
-    highlight: pygments
 link-citations: true
 ---
 
@@ -60,7 +61,7 @@ You can also find this information [here](https://rstudio-education.github.io/ds
 
 1.  Filter the Denny's dataframe for Alaska (AK) and save the result as `dn_ak`. How many Denny's locations are there in Alaska?
 
-```{r}
+```{r, eval=TRUE, echo=TRUE }
 dn_ak <- dennys %>%
   filter(state == "AK")
 nrow(dn_ak)
@@ -92,6 +93,8 @@ We'll need to calculate two distances for it: (1) distance between Denny's 1 and
 ![](img/dennys-laquinta-sketches/dennys-laquinta-sketches.003.png){width="300px" height="450px"}
 
 3.  How many pairings are there between all Denny's and all La Quinta locations in Alaska, i.e. how many distances do we need to calculate between the locations of these establishments in Alaska?
+
+ ANSWER: There are 3x2 = 6 possible pairing || locations we need to calculate.
 
 In order to calculate these distances we need to first restructure our data to pair the Denny's and La Quinta locations.
 To do so, we will join the two data frames.
@@ -135,6 +138,8 @@ dn_lq_ak
 ```
 
 4.  How many observations are in the joined `dn_lq_ak` data frame? What are the names of the variables in this data frame.
+
+  Answer: There are 6 observations and the names of the variables are: address, city, state, longtitude and latitude of x and y. x will be represent for the data from the dennys and y will be the data from the laquinta. 
 
 `.x` in the variable names means the variable comes from the `x` data frame (the first argument in the `full_join` call, i.e. `dn_ak`), and `.y` means the variable comes from the `y` data frame.
 These varibles are renamed to include `.x` and `.y` because the two data frames have the same variables and it's not possible to have two variables in a data frame with the exact same name.
