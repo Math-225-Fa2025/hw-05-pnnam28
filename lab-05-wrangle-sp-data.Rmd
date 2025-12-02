@@ -3,15 +3,15 @@ title: "HW 05 - La Quinta is Spanish for next to Denny's, Pt. 2"
 subtitle: "Wrangling spatial data"
 author: "NAM PHAM"
 output: 
-  tufte::tufte_html:
-    css: ../lab.css
-    tufte_variant: "envisioned"
-    highlight: pygments
   tufte::tufte_handout:
     latex_engine: xelatex
     highlight: pygments
     keep_tex: true
     citation_package: natbib
+  tufte::tufte_html:
+    css: ../lab.css
+    tufte_variant: "envisioned"
+    highlight: pygments
 link-citations: true
 ---
 
@@ -374,7 +374,7 @@ combined_clean <- bind_rows(dennys_clean, lq_clean)
 ggplot(combined_clean, aes(x = longitude, y= latitude, color = location)) +
   geom_point(alpha = 0.5) +
   labs(
-    title = "Location of Denny's to La Quinta in Alaska",
+    title = "Location of Denny's to La Quinta in Texas",
     x = "Longitude",
     y = "Latitude"
   ) +
@@ -440,7 +440,7 @@ combined_clean <- bind_rows(dennys_clean, lq_clean)
 ggplot(combined_clean, aes(x = longitude, y= latitude, color = location)) +
   geom_point(alpha=0.6) +
   labs(
-    title = "Location of Denny's to La Quinta in Alaska",
+    title = "Location of Denny's to La Quinta in California",
     x = "Longitude",
     y = "Latitude"
   ) +
