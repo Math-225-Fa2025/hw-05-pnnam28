@@ -45,9 +45,10 @@ We'll use the **tidyverse** package for much of the data wrangling and visualisa
 These packages are already installed for you.
 You can load them by running the following in your Console:
 
-```{r message = FALSE}
+```{r}
 library(tidyverse) 
 library(dsbox) 
+library(dplyr)
 ```
 
 ## Data
@@ -150,6 +151,9 @@ Knit, *commit, and push your changes to GitHub with an appropriate commit messag
 
 5.  What function from the tidyverse do we use the add a new variable to a data frame while keeping the existing variables?
 
+  Answer: Mutate() function can do this. 
+  
+  
 One way of calculating the distance between any two points on the earth is to use the Haversine distance formula.
 This formula takes into account the fact that the earth is not flat, but instead spherical.
 
@@ -180,29 +184,277 @@ This function takes five arguments:
 
 6.  Calculate the distances between all pairs of Denny's and La Quinta locations and save this variable as `distance`.
     Make sure to save this variable in THE `dn_lq_ak` data frame so that you can use it later.
+```{r}
+dn_lq_ak <- dn_lq_ak %>% 
+  mutate(distance = haversine (longitude.x,latitude.x,longitude.y,latitude.y))
 
+dn_lq_ak %>%
+  select(address.x, address.y, distance)
+
+```
 7.  Calculate the minimum distance between a Denny's and La Quinta for each Denny's location.
     To do so we group by Denny's locations and calculate a new variable that stores the information for the minimum distance.
 
-```{r eval = FALSE}
+```{r}
 dn_lq_ak_mindist <- dn_lq_ak %>%
   group_by(address.x) %>%
   summarise(closest = min(distance))
+
+dn_lq_ak_mindist
 ```
 
-8.  Describe the distribution of the distances Denny's and the nearest La Quinta locations in Alaska. Also include an appripriate visualization and relevant summary statistics.
+8.  Describe the distribution of the distances Denny's and the nearest La Quinta locations in Alaska. Also include an appropriate visualization and relevant summary statistics.
+
+  Answer: From the filtered data, there always at least Dennys within 10 miles or less near the La Quinta hotels. For this example, there are 3 Dennys and 2 La Quinta in the state of Alaska and there will be at least 1 Dennys near the La Quinta location. Where the maximum distance is 6 km, and the minimum distance is 2 km The average distance from Dennys to Laquinta is 4.41 km and the median is 5.1 miles. With that being said, I computed 2 plot belowed. One will be computed a new dataset that included the location ( dennys or laquinta), the longitude and the latitude, then plot it as a point plot. The other plot also use the point chart but only use the distance variables to so the average miles from Dennys to La Quinta.
+
+
+
+```{r}
+dn_lq_ak_mindist %>% 
+  summarise(
+    min = min(closest),
+    max = max(closest),
+    mean = mean(closest),
+    median = median(closest)
+  )
+```
+
+```{r}
+dennys_clean <- dennys %>%
+  filter(state == "AK")%>%
+  select(longitude = longitude,
+         latitude = latitude) %>%
+  mutate(location = "Dennys")
+
+lq_clean <- laquinta %>% 
+  filter(state == "AK")%>%
+  select(longitude = longitude,
+         latitude = latitude) %>%
+  mutate(location = "Laquinta")
+
+combined_clean <- bind_rows(dennys_clean, lq_clean) 
+  
+
+ggplot(combined_clean, aes(x = longitude, y= latitude, color = location)) +
+  geom_point() +
+  labs(
+    title = "Location of Denny's to La Quinta in Alaska",
+    x = "Longitude",
+    y = "Latitude"
+  ) +
+  theme_minimal()
+
+ggplot(dn_lq_ak_mindist, aes(x = closest, y = 1)) +
+  geom_point(size = 4, color = "darkred") +
+  labs(
+    title = "Distances from Denny's Locations to Nearest La Quinta",
+    x = "Distance (km)",
+    y = ""
+  ) +
+  theme_minimal()
+```
+
 
 Knit, *commit, and push your changes to GitHub with an appropriate commit message. Make sure to commit and push all changed files so that your Git pane is cleared up afterwards.*
 
 9.  Repeat the same analysis for North Carolina: (i) filter Denny's and La Quinta Data Frames for NC, (ii) join these data frames to get a completelist of all possible pairings, (iii) calculate the distances between all possible pairings of Denny's and La Quinta in NC, (iv) find the minimum distance between each Denny's and La Quinta location, (v) visualize and describe the distribution of these shortest distances using appropriate summary statistics.
 
+```{r}
+dn_NC <- dennys %>%
+  filter(state == "NC")
+
+lq_NC <- laquinta %>% 
+  filter(state == "NC")
+
+dn_lq_NC <- full_join(dn_NC, lq_NC, by = 'state')
+
+dn_lq_NC <- dn_lq_NC %>% 
+  mutate(distance = haversine (longitude.x,latitude.x,longitude.y,latitude.y))%>%
+  select(address.x, address.y, distance)
+
+dn_lq_NC_mindist <- dn_lq_NC %>%
+  group_by(address.x) %>%
+  summarise(closest = min(distance))
+dn_lq_NC_mindist
+
+  
+```
+  ANSWER: From the state of North Carolina, there are total of 28 location of Dennys and only 12 that of La Quinta. Based on the table, the average distance is 65.4 km from the restaurant to the hotel, whereas the minimum is 1.78 km and the maximum is 188 km away. Overall, we can tell that there are many Dennys location that spread out throughout the state where there are only a half of La Quinta.  
+```{r}
+dn_lq_NC_mindist %>% 
+  summarise(
+    min = min(closest),
+    max = max(closest),
+    mean = mean(closest),
+    median = median(closest)
+  )
+```
+
+```{r}
+dennys_clean <- dennys %>%
+  filter(state == "NC")%>%
+  select(longitude = longitude,
+         latitude = latitude) %>%
+  mutate(location = "Dennys")
+
+lq_clean <- laquinta %>% 
+  filter(state == "NC")%>%
+  select(longitude = longitude,
+         latitude = latitude) %>%
+  mutate(location = "Laquinta")
+
+combined_clean <- bind_rows(dennys_clean, lq_clean) 
+  
+
+ggplot(combined_clean, aes(x = longitude, y= latitude, color = location)) +
+  geom_point() +
+  labs(
+    title = "Location of Denny's to La Quinta in Alaska",
+    x = "Longitude",
+    y = "Latitude"
+  ) +
+  theme_minimal()
+
+```
+
+  ANSWER: From the graphs above, we can say that most of the La Quinta location, there is at least 1 Dennys with minimum of 1.78 km to average 65 km radius. Most of the Dennys opened within the La Quinta locations while there are still several Dennys location chose to open far away for conveninet purpose and easier to reach. 
+
 10. Repeat the same analysis for Texas.
 
+```{r}
+dn_TX <- dennys %>%
+  filter(state == "TX")
+nrow(dn_TX)
+
+lq_TX <- laquinta %>% 
+  filter(state == "TX")
+nrow(lq_TX)
+
+dn_lq_TX <- full_join(dn_TX, lq_TX, by = 'state')
+
+dn_lq_TX <- dn_lq_TX %>% 
+  mutate(distance = haversine (longitude.x,latitude.x,longitude.y,latitude.y))%>%
+  select(address.x, address.y, distance)
+
+dn_lq_TX_mindist <- dn_lq_TX %>%
+  group_by(address.x) %>%
+  summarise(closest = min(distance))
+dn_lq_TX_mindist
+
+  
+```
+
+```{r}
+dn_lq_TX_mindist %>% 
+  summarise(
+    min = min(closest),
+    max = max(closest),
+    mean = mean(closest),
+    median = median(closest)
+  )
+```
+  ANSWER: From the state of Texas, there are total of 200 location of Dennys and about 237 that of La Quinta. Based on the table, the average distance is 5.79 km from the restaurant to the hotel, whereas the minimum is 0.016 km and the maximum is 60.6 km away. It is noticeable that the median is only 3.37 km away from the hotel, this mean that there are many Dennys within 5km of the hotels. Overall, since Texas is one of the most populated state in the US, there are also many Dennys and Laquinta location throughout the state and there always be 1 Dennys under 5 miles next to La Quinta hotels.  
+  
+```{r}
+dennys_clean <- dennys %>%
+  filter(state == "TX")%>%
+  select(longitude = longitude,
+         latitude = latitude) %>%
+  mutate(location = "Dennys")
+
+lq_clean <- laquinta %>% 
+  filter(state == "TX")%>%
+  select(longitude = longitude,
+         latitude = latitude) %>%
+  mutate(location = "Laquinta")
+
+combined_clean <- bind_rows(dennys_clean, lq_clean) 
+  
+
+ggplot(combined_clean, aes(x = longitude, y= latitude, color = location)) +
+  geom_point(alpha = 0.5) +
+  labs(
+    title = "Location of Denny's to La Quinta in Alaska",
+    x = "Longitude",
+    y = "Latitude"
+  ) +
+  theme_minimal()
+
+```
+
+  ANSWER: From the plot, it's clearly that there are many La Quinta hotels in 3 locations, it seems like these concentrate coordinate are their biggest city and tourist attraction cities. We can also see that the most of the Dennys location got covered by the La Quinta dots, that's mean these La Quinta location had the same as Dennys. 
+
 11. Repeat the same analysis for a state of your choosing, different than the ones we covered so far.
+
+
+```{r}
+dn_CA <- dennys %>%
+  filter(state == "CA")
+nrow(dn_CA)
+
+lq_CA <- laquinta %>% 
+  filter(state == "CA")
+nrow(lq_CA)
+
+dn_lq_CA <- full_join(dn_CA, lq_CA, by = 'state')
+
+dn_lq_CA <- dn_lq_CA %>% 
+  mutate(distance = haversine (longitude.x,latitude.x,longitude.y,latitude.y))%>%
+  select(address.x, address.y, distance)
+
+dn_lq_CA_mindist <- dn_lq_CA %>%
+  group_by(address.x) %>%
+  summarise(closest = min(distance))
+dn_lq_CA_mindist
+
+  
+```
+   
+```{r}
+dn_lq_CA_mindist %>% 
+  summarise(
+    min = min(closest),
+    max = max(closest),
+    mean = mean(closest),
+    median = median(closest)
+  )
+```
+ANSWER: From the state of California, there are a huge gap between numbers of location of Dennys and La Quinta, 403 locations and 56 location, respectively. Based on the table, the average distance is 22.1 km from the restaurant to the hotel with the median is 11.9 km. The minimum distance is 0.016 km and the maximum is 253 km away from the hotels. Overall, there are many locations of restaurant and so little of La Quinta, however there are not enough information in this dataset to explain this situation. Also, the distance between the La Quinta and Dennys are 5 miles minimum. 
+
+```{r}
+dennys_clean <- dennys %>%
+  filter(state == "CA")%>%
+  select(longitude = longitude,
+         latitude = latitude) %>%
+  mutate(location = "Dennys")
+
+lq_clean <- laquinta %>% 
+  filter(state == "CA")%>%
+  select(longitude = longitude,
+         latitude = latitude) %>%
+  mutate(location = "Laquinta")
+
+combined_clean <- bind_rows(dennys_clean, lq_clean) 
+  
+
+ggplot(combined_clean, aes(x = longitude, y= latitude, color = location)) +
+  geom_point(alpha=0.6) +
+  labs(
+    title = "Location of Denny's to La Quinta in Alaska",
+    x = "Longitude",
+    y = "Latitude"
+  ) +
+  theme_minimal()
+
+```
+
+  ANSWER: From the graph, we can clearly observe that there are Dennys surrounding the La Quinta location. Most of the location of La Quinta is concentrated most in the south side where as there are only a few in the middle and the others opened on the North. The location of the Dennys showed that it spreaded evenly throughout the state. It is enough to said that there will always be at least 1 Dennys within 5 miles of La Quinta hotels. 
 
 12. Among the states you examined, where is Mitch Hedberg's joke most likely to hold true?
     Explain your reasoning.
 
+  ANSWER: Based on the information collected from the exercise above, I would said this is true for most of the case. Most of the La Quinta Hotel always have at least 1 Dennys restaurant within 5 miles. From example above, the minimum distance to find 1 Dennys is  1 km within of La Quinta. So the joke is likely to consider true for most of the case. 
+  
 Knit, *commit, and push your changes to GitHub with an appropriate commit message. Make sure to commit and push all changed files so that your Git pane is cleared up afterwards and review the md document on GitHub to make sure you're happy with the final state of your work.*
 
 Now go back through your write up to make sure you've answered all questions and all of your R chunks are properly labeled. Once you decide that you are done with the homework, choose the knit drop down and select `Knit to tufte_handout` to generate a pdf. Download and submit that pdf to Canvas. 
